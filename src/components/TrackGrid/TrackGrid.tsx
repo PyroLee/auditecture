@@ -22,7 +22,6 @@ import { Cell } from './Cell';
 import { CellContextMenu } from './CellContextMenu';
 import { TrackHeader } from './TrackHeader';
 import { TrackGhost } from './TrackGhost';
-import { AddTrackButton } from './AddTrackButton';
 
 const TRACK_ROTATIONS = [-0.4, 0.3, -0.5, 0.4, -0.3, 0.5, -0.6, 0.4];
 
@@ -30,7 +29,6 @@ export function TrackGrid() {
   const sections = useProjectStore((s) => s.sections);
   const tracks = useProjectStore((s) => s.tracks);
   const cells = useProjectStore((s) => s.cells);
-  const addTrack = useProjectStore((s) => s.addTrack);
   const removeTrack = useProjectStore((s) => s.removeTrack);
   const renameTrack = useProjectStore((s) => s.renameTrack);
   const reorderTracks = useProjectStore((s) => s.reorderTracks);
@@ -88,7 +86,7 @@ export function TrackGrid() {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={sortedTracks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-[6px] min-h-full">
+          <div className="flex flex-col gap-[6px]">
             {sortedTracks.map((track, i) => (
               <TrackHeader
                 key={track.id}
@@ -98,15 +96,6 @@ export function TrackGrid() {
                 onRequestDelete={(id) => removeTrack(id)}
               />
             ))}
-            <div
-              className="sticky bottom-0 z-10 mt-auto bg-paper/95 pt-2 pb-1"
-              style={{
-                backdropFilter: 'blur(2px)',
-                boxShadow: '0 -8px 12px -10px rgba(60,50,35,0.18)',
-              }}
-            >
-              <AddTrackButton onClick={addTrack} />
-            </div>
           </div>
         </SortableContext>
         <DragOverlay dropAnimation={null}>
@@ -119,7 +108,7 @@ export function TrackGrid() {
           className="flex items-center justify-center font-hand text-inkMute border border-dashed border-inkFaint rounded"
           style={{ fontSize: 22, height: 58 }}
         >
-          ← Click "Add track" to start drawing
+          ↖ Click "Add track" up top to start drawing
         </div>
       ) : (
       <div

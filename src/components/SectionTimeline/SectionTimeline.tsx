@@ -20,6 +20,7 @@ import { SectionBlock } from './SectionBlock';
 import { SectionContextMenu } from './SectionContextMenu';
 import { SectionGhost } from './SectionGhost';
 import { AddSectionButton } from './AddSectionButton';
+import { AddTrackButton } from '../TrackGrid/AddTrackButton';
 
 export function sectionsGridTemplate(bars: number[]): string {
   if (bars.length === 0) return '1fr';
@@ -34,6 +35,7 @@ export function SectionTimeline() {
   const removeSection = useProjectStore((s) => s.removeSection);
   const renameSection = useProjectStore((s) => s.renameSection);
   const reorderSections = useProjectStore((s) => s.reorderSections);
+  const addTrack = useProjectStore((s) => s.addTrack);
 
   const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -64,7 +66,8 @@ export function SectionTimeline() {
 
   return (
     <section className="grid gap-[10px] items-stretch py-1" style={{ gridTemplateColumns: '140px 1fr 50px' }}>
-      <div className="flex items-end pb-1">
+      <div className="flex flex-col justify-between items-start py-0.5">
+        <AddTrackButton onClick={addTrack} />
         <span
           className="font-sans font-semibold uppercase text-accent border border-inkFaint rounded-[10px] px-[7px] py-[3px]"
           style={{
