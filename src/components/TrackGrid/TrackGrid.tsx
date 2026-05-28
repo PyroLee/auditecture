@@ -78,7 +78,7 @@ export function TrackGrid() {
 
   return (
     <section
-      className="grid gap-[10px] items-stretch pt-1.5"
+      className="grid gap-[10px] items-stretch pt-1.5 min-h-0 overflow-y-auto overflow-x-hidden"
       style={{ gridTemplateColumns: '140px 1fr 50px', alignContent: 'start' }}
     >
       <DndContext
