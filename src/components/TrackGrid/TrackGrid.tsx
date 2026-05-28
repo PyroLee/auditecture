@@ -78,7 +78,7 @@ export function TrackGrid() {
 
   return (
     <section
-      className="grid gap-[10px] items-stretch pt-1.5 min-h-0 overflow-y-auto overflow-x-hidden"
+      className="grid gap-[10px] items-stretch pt-1.5 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-sketch"
       style={{ gridTemplateColumns: '140px 1fr 50px', alignContent: 'start' }}
     >
       <DndContext
@@ -88,7 +88,7 @@ export function TrackGrid() {
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={sortedTracks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-[6px]">
+          <div className="flex flex-col gap-[6px] min-h-full">
             {sortedTracks.map((track, i) => (
               <TrackHeader
                 key={track.id}
@@ -98,7 +98,15 @@ export function TrackGrid() {
                 onRequestDelete={(id) => removeTrack(id)}
               />
             ))}
-            <AddTrackButton onClick={addTrack} />
+            <div
+              className="sticky bottom-0 z-10 mt-auto bg-paper/95 pt-2 pb-1"
+              style={{
+                backdropFilter: 'blur(2px)',
+                boxShadow: '0 -8px 12px -10px rgba(60,50,35,0.18)',
+              }}
+            >
+              <AddTrackButton onClick={addTrack} />
+            </div>
           </div>
         </SortableContext>
         <DragOverlay dropAnimation={null}>

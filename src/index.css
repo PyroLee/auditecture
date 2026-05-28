@@ -35,6 +35,34 @@ body {
   background-position: 0 92px;
 }
 
+/* Hand-drawn scrollbar — low-saturation ink. Defining ::-webkit-scrollbar
+   on an element overrides Safari's "overlay" mode and forces the bar
+   to always be visible (which is what we want for affordance). */
+.scrollbar-sketch {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(60, 50, 35, 0.28) transparent;
+}
+.scrollbar-sketch::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scrollbar-sketch::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-sketch::-webkit-scrollbar-thumb {
+  background: rgba(60, 50, 35, 0.22);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scrollbar-sketch::-webkit-scrollbar-thumb:hover {
+  background: rgba(60, 50, 35, 0.42);
+  background-clip: padding-box;
+}
+.scrollbar-sketch::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Resize handle visual (two vertical bars) */
 .resize-handle {
   position: absolute;
