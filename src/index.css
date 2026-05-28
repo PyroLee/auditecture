@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+body {
+  @apply text-ink font-sans antialiased;
+  font-size: 14px;
+  background-color: #f1ead8;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 10% 0%, rgba(255, 251, 238, 0.85), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 92% 100%, rgba(196, 176, 142, 0.32), transparent 55%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.35' numOctaves='2' stitchTiles='stitch' seed='4'/><feColorMatrix values='0 0 0 0 0.18  0 0 0 0 0.14  0 0 0 0 0.10  0 0 0 0.16 0'/></filter><rect width='280' height='280' filter='url(%23n)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' seed='12'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.42  0 0 0 0 0.20  0 0 0 0.10 0'/></filter><rect width='600' height='600' filter='url(%23n)'/></svg>");
+  background-blend-mode: multiply, multiply, multiply, multiply;
+}
+
+/* Faint notebook ruling on the canvas */
+.notebook-rule {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 39px,
+    rgba(60, 50, 35, 0.09) 39px 40px
+  );
+  background-position: 0 92px;
+}
+
+/* Resize handle visual (two vertical bars) */
+.resize-handle {
+  position: absolute;
+  top: 22%;
+  right: -3px;
+  width: 6px;
+  height: 56%;
+  cursor: ew-resize;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+.resize-handle::before,
+.resize-handle::after {
+  content: '';
+  width: 2px;
+  height: 28%;
+  background: rgba(42, 38, 32, 0.42);
+  border-radius: 1px;
+}

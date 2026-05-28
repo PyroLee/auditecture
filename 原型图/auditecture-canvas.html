@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1440, initial-scale=1" />
+<title>Auditecture — Tech House Sketch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:        #f1ead8;
+  --paper-deep:   #e8dcc0;
+  --ink:          #2a2620;
+  --ink-2:        #5b5347;
+  --ink-3:        rgba(42,38,32,0.42);
+  --ink-4:        rgba(42,38,32,0.20);
+  --accent:       #1a2332;
+  --rule:         rgba(60,50,35,0.09);
+  --rule-strong:  rgba(60,50,35,0.22);
+
+  /* Section colors — low-saturation marker pen */
+  --grey:         #968d7e;
+  --grey-ink:     #4a4338;
+  --blue:         #5e7d92;
+  --blue-ink:     #2f4754;
+  --ochre:        #c19139;
+  --ochre-ink:    #6e4d10;
+  --wine:         #99454f;
+  --wine-ink:     #5a232a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  font-size: 14px;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse 70% 50% at 10% 0%, rgba(255,251,238,0.85), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 92% 100%, rgba(196,176,142,0.32), transparent 55%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.35' numOctaves='2' stitchTiles='stitch' seed='4'/><feColorMatrix values='0 0 0 0 0.18  0 0 0 0 0.14  0 0 0 0 0.10  0 0 0 0.16 0'/></filter><rect width='280' height='280' filter='url(%23n)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' seed='12'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.42  0 0 0 0 0.20  0 0 0 0.10 0'/></filter><rect width='600' height='600' filter='url(%23n)'/></svg>");
+  background-blend-mode: multiply, multiply, multiply, multiply;
+}
+
+/* === LAYOUT === */
+.canvas {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 840px;
+  padding: 20px 40px 32px;
+  display: grid;
+  grid-template-rows: 48px 92px 1fr;
+  row-gap: 18px;
+  /* Faint notebook ruling */
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0 39px, var(--rule) 39px 40px);
+  background-position: 0 92px;
+}
+
+/* Column track shared by timeline and grid:
+   140px label + 8 sections proportional to bars (16,16,8,32,16,8,32,16) + 56px add btn */
+:root { --col-tracks: 16fr 16fr 8fr 32fr 16fr 8fr 32fr 16fr; }
+
+/* === TOOLBAR === */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 0 4px 14px;
+  border-bottom: 1px dashed var(--rule-strong);
+}
+.brand {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Caveat', cursive;
+  font-size: 28px; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.8px;
+  line-height: 1;
+}
+.brand-mark { transform: rotate(-4deg); margin-right: 2px; }
+.brand-dot { color: var(--wine); }
+.divider { width: 1px; height: 22px; background: var(--rule-strong); }
+
+.project-name {
+  font-family: 'Caveat', cursive;
+  font-size: 26px; font-weight: 500;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0 4px 2px;
+  border-bottom: 1.5px dotted var(--ink-3);
+  letter-spacing: -0.4px;
+  width: 230px;
+  transform: rotate(-0.35deg);
+  line-height: 1;
+}
+.project-name:focus { border-bottom-color: var(--accent); border-bottom-style: solid; }
+
+.field {
+  display: flex; align-items: baseline; gap: 8px;
+}
+.field-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-2); font-weight: 500;
+}
+.field-value {
+  font-size: 15px; font-weight: 500; color: var(--ink);
+  letter-spacing: -0.2px;
+}
+.bpm-input {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 500; color: var(--ink);
+  background: transparent; border: none; outline: none;
+  width: 38px;
+  border-bottom: 1.5px dotted var(--ink-3);
+  padding-bottom: 1px;
+}
+
+.spacer { flex: 1; }
+
+.save-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--ink-2); font-weight: 500;
+  padding: 4px 11px 4px 9px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 14px;
+  background: rgba(255,251,238,0.45);
+  letter-spacing: 0.02em;
+}
+.save-check {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #6c8a59;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+.io-btn {
+  background: transparent; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px; color: var(--ink-2); font-weight: 500;
+  padding: 6px 4px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.io-btn:hover { color: var(--ink); }
+
+/* === SECTION TIMELINE === */
+.timeline {
+  display: grid;
+  grid-template-columns: 140px 1fr 50px;
+  gap: 10px;
+  align-items: stretch;
+  padding: 2px 0 4px;
+}
+.timeline-label {
+  font-family: 'Caveat', cursive;
+  font-size: 19px; color: var(--ink-2);
+  display: flex; align-items: flex-end; padding-bottom: 4px;
+  transform: rotate(-1.2deg);
+  letter-spacing: -0.2px;
+}
+.sections {
+  display: grid;
+  grid-template-columns: var(--col-tracks);
+  gap: 6px;
+}
+.section {
+  position: relative;
+  padding: 9px 12px 9px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-width: 0;
+  cursor: grab;
+}
+.section .bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+.section > .content {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  min-width: 0;
+}
+.section-name {
+  font-family: 'Caveat', cursive;
+  font-size: 24px; font-weight: 600;
+  line-height: 0.95; letter-spacing: -0.5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.section-bars {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--ink-2);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.s-grey  .section-name { color: var(--grey-ink); }
+.s-blue  .section-name { color: var(--blue-ink); }
+.s-ochre .section-name { color: var(--ochre-ink); }
+.s-wine  .section-name { color: var(--wine-ink); }
+
+.s-grey  .section-bars { color: rgba(74,67,56,0.78); }
+.s-blue  .section-bars { color: rgba(47,71,84,0.78); }
+.s-ochre .section-bars { color: rgba(110,77,16,0.85); }
+.s-wine  .section-bars { color: rgba(90,35,42,0.82); }
+
+/* Slight rotation variety on names */
+.section:nth-child(1) .section-name { transform: rotate(-0.8deg); }
+.section:nth-child(2) .section-name { transform: rotate(0.6deg); }
+.section:nth-child(3) .section-name { transform: rotate(-1deg); }
+.section:nth-child(4) .section-name { transform: rotate(0.5deg); }
+.section:nth-child(5) .section-name { transform: rotate(-0.5deg); }
+.section:nth-child(6) .section-name { transform: rotate(1deg); }
+.section:nth-child(7) .section-name { transform: rotate(-0.4deg); }
+.section:nth-child(8) .section-name { transform: rotate(0.7deg); }
+
+/* Resize handle on section right edge */
+.resize-handle {
+  position: absolute; top: 22%; right: -3px;
+  width: 6px; height: 56%;
+  cursor: ew-resize; z-index: 3;
+  display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+}
+.resize-handle::before, .resize-handle::after {
+  content: ''; width: 2px; height: 28%;
+  background: var(--ink-3); border-radius: 1px;
+}
+
+.add-section {
+  align-self: center;
+  width: 50px; height: 70px;
+  border: none; background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: -4px;
+}
+.add-section svg { width: 30px; height: 30px; color: var(--ink-3); }
+.add-section:hover svg { color: var(--ink-2); }
+
+/* === TRACK GRID === */
+.tracks {
+  display: grid;
+  grid-template-columns: 140px 1fr 50px;
+  gap: 10px;
+  align-content: start;
+  align-items: stretch;
+  padding-top: 6px;
+}
+.tracks .left-col,
+.tracks .right-col {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.right-col { padding-top: 2px; }
+
+.track-label {
+  position: relative;
+  height: 58px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 4px;
+  font-family: 'Caveat', cursive;
+  font-size: 26px;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+.track-label:nth-child(1) { transform: rotate(-0.4deg); }
+.track-label:nth-child(2) { transform: rotate(0.3deg); }
+.track-label:nth-child(3) { transform: rotate(-0.5deg); }
+.track-label:nth-child(4) { transform: rotate(0.4deg); }
+.track-label:nth-child(5) { transform: rotate(-0.3deg); }
+.track-label:nth-child(6) { transform: rotate(0.5deg); }
+
+.grip {
+  display: inline-flex;
+  color: var(--ink-4);
+  cursor: grab;
+  flex-shrink: 0;
+}
+.track-name {
+  white-space: nowrap; overflow: hidden;
+  font-weight: 500;
+}
+
+.cells-col {
+  display: grid;
+  grid-template-rows: repeat(6, 58px);
+  gap: 6px;
+}
+.cell-row {
+  display: grid;
+  grid-template-columns: var(--col-tracks);
+  gap: 6px;
+}
+.cell {
+  position: relative;
+  min-width: 0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cell svg.bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* Add Track row */
+.add-track {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 4px 0;
+  cursor: pointer;
+  font-family: 'Caveat', cursive;
+  font-size: 24px; color: var(--ink-3);
+  letter-spacing: -0.3px;
+  transform: rotate(-0.4deg);
+  margin-top: 10px;
+}
+.add-track:hover { color: var(--ink-2); }
+.add-track svg { color: inherit; }
+
+/* Cell hover affordance */
+.cell:hover { outline: 1.5px dashed var(--ink-3); outline-offset: -2px; }
+.section:hover { transform: translateY(-1px); transition: transform 120ms; }
+.timeline-label-tag {
+  position: relative;
+  display: flex; align-items: center; gap: 6px;
+}
+.timeline-tag-mark {
+  color: var(--accent);
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  font-family: 'DM Sans', sans-serif; font-weight: 600;
+  padding: 3px 7px; border: 1px solid var(--ink-4); border-radius: 10px;
+  transform: rotate(-2deg);
+}
+</style>
+</head>
+<body>
+
+<!-- ================= SHARED SVG DEFS ================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Subtle organic displacement for hand-drawn rect borders -->
+    <filter id="ink-bleed" x="-3%" y="-8%" width="106%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018 0.04" numOctaves="2" seed="5"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.6"/>
+    </filter>
+    <filter id="ink-bleed-2" x="-3%" y="-8%" width="106%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.06" numOctaves="2" seed="11"/>
+      <feDisplacementMap in="SourceGraphic" scale="2.0"/>
+    </filter>
+    <filter id="ink-bleed-soft" x="-3%" y="-8%" width="106%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="1" seed="3"/>
+      <feDisplacementMap in="SourceGraphic" scale="1.2"/>
+    </filter>
+
+    <!-- Marker fill texture: noise overlay on filled cells -->
+    <filter id="marker-fill" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7"/>
+      <feColorMatrix values="0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.05  0 0 0 0.30 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+      <feComposite in="SourceGraphic" operator="over"/>
+    </filter>
+
+    <!-- Diagonal hatch patterns for fade transitions -->
+    <pattern id="hatch-grey" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#4a4338" stroke-width="1.4" opacity="0.55"/>
+    </pattern>
+    <pattern id="hatch-blue" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#2f4754" stroke-width="1.4" opacity="0.55"/>
+    </pattern>
+    <pattern id="hatch-ochre" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#6e4d10" stroke-width="1.4" opacity="0.55"/>
+    </pattern>
+    <pattern id="hatch-wine" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#5a232a" stroke-width="1.4" opacity="0.55"/>
+    </pattern>
+
+    <!-- Fade gradients (used as masks) -->
+    <linearGradient id="fade-in" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="white" stop-opacity="0"/>
+      <stop offset="100%" stop-color="white" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="fade-out" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="white" stop-opacity="1"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="m-fade-in"><rect width="100%" height="100%" fill="url(#fade-in)"/></mask>
+    <mask id="m-fade-out"><rect width="100%" height="100%" fill="url(#fade-out)"/></mask>
+
+    <!-- Empty-cell faint dot grid -->
+    <pattern id="empty-dots" patternUnits="userSpaceOnUse" width="8" height="8">
+      <circle cx="1" cy="1" r="0.6" fill="#2a2620" opacity="0.13"/>
+    </pattern>
+  </defs>
+</svg>
+
+<div class="canvas">
+
+  <!-- ================= TOOLBAR ================= -->
+  <header class="toolbar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <path d="M3 17 Q3 5 11 5 Q19 5 19 17" stroke="#1a2332" stroke-width="2" fill="none"
+                stroke-linecap="round" filter="url(#ink-bleed-soft)"/>
+          <circle cx="6" cy="17" r="2.4" fill="#1a2332" filter="url(#ink-bleed-soft)"/>
+          <circle cx="16" cy="17" r="2.4" fill="#1a2332" filter="url(#ink-bleed-soft)"/>
+        </svg>
+      </span>
+      Auditecture<span class="brand-dot">.</span>
+    </div>
+
+    <span class="divider"></span>
+
+    <input class="project-name" value="Tech House Sketch" spellcheck="false" />
+
+    <span class="divider"></span>
+
+    <div class="field">
+      <span class="field-label">BPM</span>
+      <input class="bpm-input" value="128" />
+    </div>
+
+    <div class="field">
+      <span class="field-label">Total</span>
+      <span class="field-value">3:24</span>
+    </div>
+
+    <div class="field">
+      <span class="field-label">Bars</span>
+      <span class="field-value">144</span>
+    </div>
+
+    <span class="spacer"></span>
+
+    <div class="save-pill">
+      <span class="save-check">
+        <svg width="7" height="7" viewBox="0 0 7 7" fill="none" aria-hidden="true">
+          <path d="M1 3.5 L2.8 5.2 L6 1.8" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      Saved · just now
+    </div>
+    <button class="io-btn">Import</button>
+    <button class="io-btn">Export</button>
+  </header>
+
+  <!-- ================= SECTION TIMELINE ================= -->
+  <section class="timeline">
+    <div class="timeline-label-tag">
+      <span class="timeline-tag-mark">Sections</span>
+    </div>
+
+    <div class="sections">
+      <!-- INTRO 16 -->
+      <div class="section s-grey">
+        <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#968d7e" fill-opacity="0.28" stroke="#4a4338" stroke-width="1.4"
+                filter="url(#ink-bleed)" vector-effect="non-scaling-stroke"/>
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="url(#empty-dots)" opacity="0.4" filter="url(#ink-bleed-soft)"/>
+        </svg>
+        <div class="content">
+          <div class="section-name">Intro</div>
+          <div class="section-bars">16 bars</div>
+        </div>
+        <span class="resize-handle"></span>
+      </div>
+
+      <!-- VERSE 16 -->
+      <div class="section s-blue">
+        <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#5e7d92" fill-opacity="0.32" stroke="#2f4754" stroke-width="1.4"
+                filter="url(#ink-bleed)" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div class="content">
+          <div class="section-name">Verse</div>
+          <div class="section-bars">16 bars</div>
+        </div>
+        <span class="resize-handle"></span>
+      </div>
+
+      <!-- BUILD 8 -->
+      <div class="section s-ochre">
+        <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#c19139" fill-opacity="0.36" stroke="#6e4d10" stroke-width="1.4"
+                filter="url(#ink-bleed-2)" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div class="content">
+          <div class="section-name">Build</div>
+          <div class="section-bars">8</div>
+        </div>
+        <span class="resize-handle"></span>
+      </div>
+
+      <!-- DROP 32 -->
+      <div class="section s-wine">
+        <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#99454f" fill-opacity="0.34" stroke="#5a232a" stroke-width="1.6"
+                filter="url(#ink-bleed)" vector-effect="non-scaling-stroke"/>
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#99454f" fill-opacity="0.08" filter="url(#marker-fill)"/>
+        </svg>
+        <div class="content">
+          <div class="section-name">Drop</div>
+          <div class="section-bars">32 bars</div>
+        </div>
+        <span class="resize-handle"></span>
+      </div>
+
+      <!-- BREAK 16 -->
+      <div class="section s-blue">
+        <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#5e7d92" fill-opacity="0.30" stroke="#2f4754" stroke-width="1.4"
+                filter="url(#ink-bleed-2)" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div class="content">
+          <div class="section-name">Break</div>
+          <div class="section-bars">16 bars</div>
+        </div>
+        <span class="resize-handle"></span>
+      </div>
+
+      <!-- BUILD 2 -->
+      <div class="section s-ochre">
+        <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#c19139" fill-opacity="0.36" stroke="#6e4d10" stroke-width="1.4"
+                filter="url(#ink-bleed)" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div class="content">
+          <div class="section-name">Build 2</div>
+          <div class="section-bars">8</div>
+        </div>
+        <span class="resize-handle"></span>
+      </div>
+
+      <!-- DROP 2 -->
+      <div class="section s-wine">
+        <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#99454f" fill-opacity="0.36" stroke="#5a232a" stroke-width="1.6"
+                filter="url(#ink-bleed-2)" vector-effect="non-scaling-stroke"/>
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#99454f" fill-opacity="0.08" filter="url(#marker-fill)"/>
+        </svg>
+        <div class="content">
+          <div class="section-name">Drop 2</div>
+          <div class="section-bars">32 bars</div>
+        </div>
+        <span class="resize-handle"></span>
+      </div>
+
+      <!-- OUTRO -->
+      <div class="section s-grey">
+        <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="#968d7e" fill-opacity="0.28" stroke="#4a4338" stroke-width="1.4"
+                filter="url(#ink-bleed-2)" vector-effect="non-scaling-stroke"/>
+          <rect x="3" y="3" width="94" height="94" rx="4" ry="4"
+                fill="url(#empty-dots)" opacity="0.4" filter="url(#ink-bleed-soft)"/>
+        </svg>
+        <div class="content">
+          <div class="section-name">Outro</div>
+          <div class="section-bars">16 bars</div>
+        </div>
+        <span class="resize-handle"></span>
+      </div>
+    </div>
+
+    <!-- Hand-drawn plus -->
+    <button class="add-section" aria-label="Add section">
+      <svg viewBox="0 0 30 30" fill="none" aria-hidden="true">
+        <path d="M15 5 Q15.4 14.5 15 25" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" filter="url(#ink-bleed-soft)"/>
+        <path d="M5 15 Q14.6 15.4 25 15" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" filter="url(#ink-bleed-soft)"/>
+      </svg>
+    </button>
+  </section>
+
+  <!-- ================= TRACK GRID ================= -->
+  <section class="tracks">
+
+    <!-- LEFT: track names -->
+    <div class="left-col">
+      <div class="track-label">
+        <span class="grip" aria-hidden="true">
+          <svg width="12" height="20" viewBox="0 0 12 20"><g fill="currentColor">
+            <circle cx="3" cy="4" r="1.4"/><circle cx="9" cy="4" r="1.4"/>
+            <circle cx="3" cy="10" r="1.4"/><circle cx="9" cy="10" r="1.4"/>
+            <circle cx="3" cy="16" r="1.4"/><circle cx="9" cy="16" r="1.4"/>
+          </g></svg>
+        </span>
+        <span class="track-name">Kick</span>
+      </div>
+      <div class="track-label">
+        <span class="grip" aria-hidden="true">
+          <svg width="12" height="20" viewBox="0 0 12 20"><g fill="currentColor">
+            <circle cx="3" cy="4" r="1.4"/><circle cx="9" cy="4" r="1.4"/>
+            <circle cx="3" cy="10" r="1.4"/><circle cx="9" cy="10" r="1.4"/>
+            <circle cx="3" cy="16" r="1.4"/><circle cx="9" cy="16" r="1.4"/>
+          </g></svg>
+        </span>
+        <span class="track-name">Bass</span>
+      </div>
+      <div class="track-label">
+        <span class="grip" aria-hidden="true">
+          <svg width="12" height="20" viewBox="0 0 12 20"><g fill="currentColor">
+            <circle cx="3" cy="4" r="1.4"/><circle cx="9" cy="4" r="1.4"/>
+            <circle cx="3" cy="10" r="1.4"/><circle cx="9" cy="10" r="1.4"/>
+            <circle cx="3" cy="16" r="1.4"/><circle cx="9" cy="16" r="1.4"/>
+          </g></svg>
+        </span>
+        <span class="track-name">Lead Synth</span>
+      </div>
+      <div class="track-label">
+        <span class="grip" aria-hidden="true">
+          <svg width="12" height="20" viewBox="0 0 12 20"><g fill="currentColor">
+            <circle cx="3" cy="4" r="1.4"/><circle cx="9" cy="4" r="1.4"/>
+            <circle cx="3" cy="10" r="1.4"/><circle cx="9" cy="10" r="1.4"/>
+            <circle cx="3" cy="16" r="1.4"/><circle cx="9" cy="16" r="1.4"/>
+          </g></svg>
+        </span>
+        <span class="track-name">Pad</span>
+      </div>
+      <div class="track-label">
+        <span class="grip" aria-hidden="true">
+          <svg width="12" height="20" viewBox="0 0 12 20"><g fill="currentColor">
+            <circle cx="3" cy="4" r="1.4"/><circle cx="9" cy="4" r="1.4"/>
+            <circle cx="3" cy="10" r="1.4"/><circle cx="9" cy="10" r="1.4"/>
+            <circle cx="3" cy="16" r="1.4"/><circle cx="9" cy="16" r="1.4"/>
+          </g></svg>
+        </span>
+        <span class="track-name">Vocal</span>
+      </div>
+      <div class="track-label">
+        <span class="grip" aria-hidden="true">
+          <svg width="12" height="20" viewBox="0 0 12 20"><g fill="currentColor">
+            <circle cx="3" cy="4" r="1.4"/><circle cx="9" cy="4" r="1.4"/>
+            <circle cx="3" cy="10" r="1.4"/><circle cx="9" cy="10" r="1.4"/>
+            <circle cx="3" cy="16" r="1.4"/><circle cx="9" cy="16" r="1.4"/>
+          </g></svg>
+        </span>
+        <span class="track-name">FX</span>
+      </div>
+
+      <div class="add-track">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <path d="M11 3 Q11.3 10.5 11 19" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" filter="url(#ink-bleed-soft)"/>
+          <path d="M3 11 Q10.6 11.3 19 11" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" filter="url(#ink-bleed-soft)"/>
+        </svg>
+        Add track
+      </div>
+    </div>
+
+    <!-- CENTER: cells -->
+    <div class="cells-col" id="cells-col">
+      <!-- Rows populated by script for compactness -->
+    </div>
+
+    <!-- RIGHT: spacer column matching timeline add button -->
+    <div class="right-col"></div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+   Cell renderer
+   States: 'e' empty, 'a' active, 'fi' fade-in, 'fo' fade-out
+   Colors map to the section column index.
+   ========================================================= */
+const COL_COLORS = [
+  'grey',  // Intro
+  'blue',  // Verse
+  'ochre', // Build
+  'wine',  // Drop
+  'blue',  // Break
+  'ochre', // Build 2
+  'wine',  // Drop 2
+  'grey',  // Outro
+];
+
+const PALETTE = {
+  grey:  { fill: '#968d7e', ink: '#4a4338', hatch: 'hatch-grey'  },
+  blue:  { fill: '#5e7d92', ink: '#2f4754', hatch: 'hatch-blue'  },
+  ochre: { fill: '#c19139', ink: '#6e4d10', hatch: 'hatch-ochre' },
+  wine:  { fill: '#99454f', ink: '#5a232a', hatch: 'hatch-wine'  },
+};
+
+const TRACK_PATTERN = [
+  // Intro Verse Build Drop Break Bld2 Drop2 Outro
+  ['e',  'a',  'fo', 'a',  'e',  'fo', 'a',  'e' ], // Kick
+  ['e',  'a',  'fi', 'a',  'e',  'fi', 'a',  'fo'], // Bass
+  ['e',  'e',  'fi', 'a',  'e',  'fi', 'a',  'fo'], // Lead Synth
+  ['fi', 'a',  'fo', 'fo', 'a',  'fo', 'fo', 'a' ], // Pad
+  ['e',  'a',  'e',  'a',  'a',  'e',  'a',  'fo'], // Vocal
+  ['e',  'e',  'a',  'a',  'fi', 'a',  'a',  'e' ], // FX
+];
+
+function emptyCell(){
+  return `
+    <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <rect x="2.5" y="2.5" width="95" height="95" rx="3" ry="3"
+            fill="url(#empty-dots)" stroke="rgba(42,38,32,0.18)" stroke-width="0.8"
+            stroke-dasharray="3 3" filter="url(#ink-bleed-soft)" vector-effect="non-scaling-stroke"/>
+    </svg>`;
+}
+
+function activeCell(color, seedShift=0){
+  const p = PALETTE[color];
+  const f = seedShift % 2 === 0 ? 'ink-bleed' : 'ink-bleed-2';
+  return `
+    <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <rect x="3" y="3" width="94" height="94" rx="3" ry="3"
+            fill="${p.fill}" fill-opacity="0.52" stroke="${p.ink}" stroke-width="1.4"
+            filter="url(#${f})" vector-effect="non-scaling-stroke"/>
+      <rect x="3" y="3" width="94" height="94" rx="3" ry="3"
+            fill="${p.fill}" fill-opacity="0.14" filter="url(#marker-fill)"/>
+    </svg>`;
+}
+
+function fadeInCell(color){
+  const p = PALETTE[color];
+  return `
+    <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <g mask="url(#m-fade-in)">
+        <rect x="3" y="3" width="94" height="94" rx="3" ry="3"
+              fill="${p.fill}" fill-opacity="0.52" stroke="${p.ink}" stroke-width="1.4"
+              filter="url(#ink-bleed)" vector-effect="non-scaling-stroke"/>
+      </g>
+      <rect x="3" y="3" width="94" height="94" rx="3" ry="3"
+            fill="url(#${p.hatch})" stroke="${p.ink}" stroke-width="1"
+            stroke-dasharray="3 3" stroke-opacity="0.6"
+            filter="url(#ink-bleed-soft)" vector-effect="non-scaling-stroke"/>
+      <!-- arrow hinting the direction -->
+      <g transform="translate(72 50)" filter="url(#ink-bleed-soft)">
+        <path d="M0 0 L14 0 M9 -4 L14 0 L9 4" stroke="${p.ink}" stroke-width="1.4"
+              stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </g>
+    </svg>`;
+}
+
+function fadeOutCell(color){
+  const p = PALETTE[color];
+  return `
+    <svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <g mask="url(#m-fade-out)">
+        <rect x="3" y="3" width="94" height="94" rx="3" ry="3"
+              fill="${p.fill}" fill-opacity="0.52" stroke="${p.ink}" stroke-width="1.4"
+              filter="url(#ink-bleed)" vector-effect="non-scaling-stroke"/>
+      </g>
+      <rect x="3" y="3" width="94" height="94" rx="3" ry="3"
+            fill="url(#${p.hatch})" stroke="${p.ink}" stroke-width="1"
+            stroke-dasharray="3 3" stroke-opacity="0.45"
+            filter="url(#ink-bleed-soft)" vector-effect="non-scaling-stroke"/>
+      <g transform="translate(14 50)" filter="url(#ink-bleed-soft)">
+        <path d="M0 0 L14 0 M9 -4 L14 0 L9 4" stroke="${p.ink}" stroke-width="1.4"
+              stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
+      </g>
+    </svg>`;
+}
+
+const builders = { e: emptyCell, a: activeCell, fi: fadeInCell, fo: fadeOutCell };
+
+const wrap = document.getElementById('cells-col');
+wrap.innerHTML = TRACK_PATTERN.map((row, ri) => {
+  const cells = row.map((state, ci) => {
+    const color = COL_COLORS[ci];
+    let inner;
+    if (state === 'e')      inner = emptyCell();
+    else if (state === 'a') inner = activeCell(color, ri + ci);
+    else if (state === 'fi') inner = fadeInCell(color);
+    else                     inner = fadeOutCell(color);
+    return `<div class="cell c-${state}">${inner}</div>`;
+  }).join('');
+  return `<div class="cell-row">${cells}</div>`;
+}).join('');
+</script>
+</body>
+</html>

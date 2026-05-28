@@ -1,0 +1,21 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.log
+.env
+.env.local
+
+# TypeScript incremental build cache (from `tsc -b`)
+*.tsbuildinfo
+
+# tsc -b emit for vite.config.ts (vite uses its own pipeline; these are noise)
+vite.config.js
+vite.config.d.ts
+
+# Claude Code project-level state (plans, settings, agent traces)
+.claude/
