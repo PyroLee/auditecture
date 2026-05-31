@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Check, Undo2, Redo2 } from 'lucide-react';
 import { useProjectStore, getCurrentProject } from '../../store/useProjectStore';
 import { downloadProjectJson, pickAndImportProjectJson } from '../../lib/io';
+import { downloadMidi } from '../../lib/midi';
 
 function formatDuration(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
@@ -134,6 +135,28 @@ export function Toolbar() {
       </div>
 
       <SavePill status={saveStatus} />
+
+      <button
+        className="bg-transparent cursor-pointer font-sans uppercase font-semibold text-accent hover:text-ink"
+        style={{
+          fontSize: 11,
+          padding: '5px 9px',
+          letterSpacing: '0.08em',
+          border: '1px dashed rgba(60,50,35,0.32)',
+          borderRadius: 6,
+          transform: 'rotate(-0.5deg)',
+        }}
+        title="Export as DAW template (.mid) — tempo + section markers + ghost-note regions"
+        onClick={() => {
+          try {
+            downloadMidi(getCurrentProject());
+          } catch (err) {
+            alert('MIDI export failed: ' + String(err));
+          }
+        }}
+      >
+        ↓ MIDI
+      </button>
 
       <button
         className="bg-transparent border-none cursor-pointer font-sans uppercase font-medium text-inkSoft hover:text-ink"
