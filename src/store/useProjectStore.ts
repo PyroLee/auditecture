@@ -6,6 +6,7 @@ import {
 } from '../lib/defaults';
 import { makeId } from '../lib/id';
 import { generateRandomSketch } from '../lib/generator';
+import { DEFAULT_KEY } from '../lib/keys';
 import {
   HistoryState,
   emptyHistory,
@@ -18,7 +19,7 @@ import {
   loadProjectFromStorage,
 } from './persist';
 
-type ProjectSnapshot = Pick<Project, 'name' | 'bpm' | 'sections' | 'tracks' | 'cells'>;
+type ProjectSnapshot = Pick<Project, 'name' | 'bpm' | 'key' | 'sections' | 'tracks' | 'cells'>;
 
 export type SaveStatus = 'idle' | 'saving' | 'saved';
 
@@ -31,6 +32,7 @@ interface ProjectState extends ProjectSnapshot {
   // Project-level
   setProjectName: (name: string) => void;
   setBpm: (bpm: number) => void;
+  setKey: (key: string) => void;
   loadProject: (project: Project) => void;
   resetProject: () => void;
   randomizeProject: () => void;
@@ -75,6 +77,7 @@ function snapshot(state: ProjectSnapshot): ProjectSnapshot {
   return {
     name: state.name,
     bpm: state.bpm,
+    key: state.key,
     sections: state.sections.map((s) => ({ ...s })),
     tracks: state.tracks.map((t) => ({ ...t })),
     cells: state.cells.map((c) => ({ ...c })),
@@ -94,6 +97,7 @@ function initialState(): ProjectSnapshot & { createdAt: string } {
   return {
     name: project.name,
     bpm: project.bpm,
+    key: project.key ?? DEFAULT_KEY,
     sections: project.sections,
     tracks: project.tracks,
     cells: project.cells,
@@ -108,6 +112,7 @@ function buildProject(state: ProjectState): Project {
     version: 1,
     name: state.name,
     bpm: state.bpm,
+    key: state.key,
     sections: state.sections,
     tracks: state.tracks,
     cells: state.cells,
@@ -151,10 +156,12 @@ export const useProjectStore = create<ProjectState>((set, get) => {
       const clamped = Math.max(40, Math.min(240, Math.round(bpm)));
       commit((d) => void (d.bpm = clamped));
     },
+    setKey: (key) => commit((d) => void (d.key = key)),
     loadProject: (project) => {
       set({
         name: project.name,
         bpm: project.bpm,
+        key: project.key ?? DEFAULT_KEY,
         sections: project.sections,
         tracks: project.tracks,
         cells: project.cells,
@@ -168,6 +175,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
       set({
         name: fresh.name,
         bpm: fresh.bpm,
+        key: fresh.key,
         sections: fresh.sections,
         tracks: fresh.tracks,
         cells: fresh.cells,
@@ -183,6 +191,7 @@ export const useProjectStore = create<ProjectState>((set, get) => {
       commit((d) => {
         d.name = sketch.name;
         d.bpm = sketch.bpm;
+        d.key = sketch.key;
         d.sections = sketch.sections;
         d.tracks = sketch.tracks;
         d.cells = sketch.cells;
@@ -335,6 +344,7 @@ useProjectStore.subscribe((state) => {
   const key = JSON.stringify({
     n: project.name,
     b: project.bpm,
+    k: project.key,
     s: project.sections,
     t: project.tracks,
     c: project.cells,

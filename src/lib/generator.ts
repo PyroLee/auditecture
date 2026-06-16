@@ -1,6 +1,7 @@
 import { Cell, CellState, Section, Track } from '../types/project';
 import { makeId } from './id';
 import { paletteForName } from './palette';
+import { randomKey } from './keys';
 
 /**
  * Random song-structure generator.
@@ -239,6 +240,7 @@ function randomName(): string {
 export interface RandomSketch {
   name: string;
   bpm: number;
+  key: string;
   sections: Section[];
   tracks: Track[];
   cells: Cell[];
@@ -286,5 +288,5 @@ export function generateRandomSketch(): RandomSketch {
     }
   }
 
-  return { name: randomName(), bpm, sections, tracks, cells };
+  return { name: randomName(), bpm, key: randomKey(), sections, tracks, cells };
 }

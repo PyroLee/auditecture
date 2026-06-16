@@ -3,6 +3,7 @@ import { Check, Undo2, Redo2, Dices } from 'lucide-react';
 import { useProjectStore, getCurrentProject } from '../../store/useProjectStore';
 import { downloadProjectJson, pickAndImportProjectJson } from '../../lib/io';
 import { downloadMidi } from '../../lib/midi';
+import { KEY_ROOTS } from '../../lib/keys';
 
 function formatDuration(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
@@ -13,9 +14,11 @@ function formatDuration(totalSeconds: number): string {
 export function Toolbar() {
   const name = useProjectStore((s) => s.name);
   const bpm = useProjectStore((s) => s.bpm);
+  const musicalKey = useProjectStore((s) => s.key);
   const sections = useProjectStore((s) => s.sections);
   const setProjectName = useProjectStore((s) => s.setProjectName);
   const setBpm = useProjectStore((s) => s.setBpm);
+  const setKey = useProjectStore((s) => s.setKey);
   const loadProject = useProjectStore((s) => s.loadProject);
   const resetProject = useProjectStore((s) => s.resetProject);
   const randomizeProject = useProjectStore((s) => s.randomizeProject);
@@ -98,6 +101,40 @@ export function Toolbar() {
             if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
           }}
         />
+      </Field>
+
+      <Field label="Key">
+        <select
+          className="bg-transparent border-none outline-none font-sans cursor-pointer hover:text-accent"
+          style={{
+            fontSize: 15,
+            fontWeight: 500,
+            color: '#2a2620',
+            borderBottom: '1.5px dotted rgba(42,38,32,0.42)',
+            paddingBottom: 1,
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            MozAppearance: 'none',
+          }}
+          value={musicalKey}
+          onChange={(e) => setKey(e.target.value)}
+          title="Project key — pick or roll a random one"
+        >
+          <optgroup label="Minor">
+            {KEY_ROOTS.map((root) => (
+              <option key={`${root}-minor`} value={`${root} minor`}>
+                {root} minor
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Major">
+            {KEY_ROOTS.map((root) => (
+              <option key={`${root}-major`} value={`${root} major`}>
+                {root} major
+              </option>
+            ))}
+          </optgroup>
+        </select>
       </Field>
 
       <Field label="Total">

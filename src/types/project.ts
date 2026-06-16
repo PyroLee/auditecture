@@ -24,6 +24,7 @@ export interface Project {
   version: 1;
   name: string;
   bpm: number;
+  key: string; // e.g. "A minor"; added post-v1, old files default to DEFAULT_KEY on load
   sections: Section[];
   tracks: Track[];
   cells: Cell[];

@@ -1,6 +1,7 @@
 import { PROJECT_VERSION, Project, Section, Track } from '../types/project';
 import { makeId } from './id';
 import { paletteForName } from './palette';
+import { DEFAULT_KEY } from './keys';
 
 export const SECTION_PRESET_NAMES = [
   'Intro',
@@ -55,6 +56,7 @@ export function makeDefaultProject(): Project {
     version: PROJECT_VERSION,
     name: 'Tech House Sketch',
     bpm: 128,
+    key: DEFAULT_KEY,
     sections: makeDefaultSections(),
     tracks: makeDefaultTracks(),
     cells: [],
