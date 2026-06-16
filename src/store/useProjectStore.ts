@@ -5,6 +5,7 @@ import {
   makeDefaultProject,
 } from '../lib/defaults';
 import { makeId } from '../lib/id';
+import { generateRandomSketch } from '../lib/generator';
 import {
   HistoryState,
   emptyHistory,
@@ -32,6 +33,7 @@ interface ProjectState extends ProjectSnapshot {
   setBpm: (bpm: number) => void;
   loadProject: (project: Project) => void;
   resetProject: () => void;
+  randomizeProject: () => void;
 
   // Sections
   addSection: () => void;
@@ -172,6 +174,18 @@ export const useProjectStore = create<ProjectState>((set, get) => {
         createdAt: fresh.createdAt,
         history: emptyHistory(),
         inTransaction: false,
+      });
+    },
+    randomizeProject: () => {
+      // Routed through commit() so it lands in history — a roll you don't
+      // like is one Cmd+Z away from your previous sketch.
+      const sketch = generateRandomSketch();
+      commit((d) => {
+        d.name = sketch.name;
+        d.bpm = sketch.bpm;
+        d.sections = sketch.sections;
+        d.tracks = sketch.tracks;
+        d.cells = sketch.cells;
       });
     },
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, Undo2, Redo2 } from 'lucide-react';
+import { Check, Undo2, Redo2, Dices } from 'lucide-react';
 import { useProjectStore, getCurrentProject } from '../../store/useProjectStore';
 import { downloadProjectJson, pickAndImportProjectJson } from '../../lib/io';
 import { downloadMidi } from '../../lib/midi';
@@ -18,6 +18,7 @@ export function Toolbar() {
   const setBpm = useProjectStore((s) => s.setBpm);
   const loadProject = useProjectStore((s) => s.loadProject);
   const resetProject = useProjectStore((s) => s.resetProject);
+  const randomizeProject = useProjectStore((s) => s.randomizeProject);
   const saveStatus = useProjectStore((s) => s.saveStatus);
   const undo = useProjectStore((s) => s.undo);
   const redo = useProjectStore((s) => s.redo);
@@ -135,6 +136,24 @@ export function Toolbar() {
       </div>
 
       <SavePill status={saveStatus} />
+
+      <button
+        className="group flex items-center gap-1.5 cursor-pointer font-sans uppercase font-semibold text-paper hover:brightness-110"
+        style={{
+          fontSize: 11,
+          padding: '5px 11px',
+          letterSpacing: '0.08em',
+          background: '#99454f',
+          border: '1px solid #5a232a',
+          borderRadius: 6,
+          transform: 'rotate(0.5deg)',
+        }}
+        title="Roll a fresh random song-structure template — your creative prompt for the week (⌘Z to undo)"
+        onClick={randomizeProject}
+      >
+        <Dices size={14} strokeWidth={2} className="transition-transform group-hover:rotate-12" />
+        Random
+      </button>
 
       <button
         className="bg-transparent cursor-pointer font-sans uppercase font-semibold text-accent hover:text-ink"
