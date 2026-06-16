@@ -82,6 +82,47 @@ const DISPLAY_BY_ROLE: Record<SectionRole, string> = {
   outro: 'Outro',
 };
 
+// Keep generated sketches short & experimental — aim for ~2 minutes.
+const TARGET_SECONDS = 120;
+
+// Snap to the nearest 4-bar phrase (the fundamental unit in electronic music).
+function snapToPhrase(bars: number): number {
+  return Math.max(4, Math.round(bars / 4) * 4);
+}
+
+/**
+ * Scale section lengths so the whole track lands on ~TARGET_SECONDS, preserving
+ * each section's *relative* length (a drop stays longer than an intro) while
+ * locking total runtime to ~2 minutes. Everything stays on a 4-bar grid.
+ *
+ * bars ≈ seconds × bpm / (4 beats/bar × 60 s/min) = seconds × bpm / 240
+ */
+function fitToTargetDuration(sections: Section[], bpm: number): void {
+  const currentBars = sections.reduce((sum, s) => sum + s.bars, 0);
+  if (currentBars === 0) return;
+
+  // Target on a 4-bar grid; never below 4 bars per section.
+  const targetBars = Math.max(
+    4 * sections.length,
+    Math.round((TARGET_SECONDS * bpm) / 240 / 4) * 4,
+  );
+  const factor = targetBars / currentBars;
+  for (const s of sections) s.bars = snapToPhrase(s.bars * factor);
+
+  // Correct snap rounding: nudge ±4 bars round-robin until exactly on target.
+  let total = sections.reduce((sum, s) => sum + s.bars, 0);
+  for (let i = 0, guard = 0; total !== targetBars && guard < 500; i++, guard++) {
+    const s = sections[i % sections.length];
+    if (total < targetBars) {
+      s.bars += 4;
+      total += 4;
+    } else if (s.bars > 4) {
+      s.bars -= 4;
+      total -= 4;
+    }
+  }
+}
+
 // ---------- Track roles & cell matrix ----------
 type TrackRole = 'kick' | 'snare' | 'bass' | 'lead' | 'pad' | 'vocal' | 'perc' | 'fx';
 
@@ -268,6 +309,7 @@ export function generateRandomSketch(): RandomSketch {
     return { section, role };
   });
   const sections = paired.map((p) => p.section);
+  fitToTargetDuration(sections, bpm);
 
   // Tracks
   const tracks: Track[] = pickTracks(style).map((name, i) => ({
